@@ -238,7 +238,7 @@ def main():
             if phrase:
                 print(phrase)
             else:
-                print("There is no current 'inspirational' quote, but\nYou Got This!")
+                print("There is no current 'inspirational' quote, but\nwhen death finds you it better find you living!")
             continue
         
         do_command(command)
