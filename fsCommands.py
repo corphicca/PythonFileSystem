@@ -28,22 +28,22 @@ def fs_cp(source, destination):
     Copy from a normal or supplemental file to supplemental FS stored in private.pfs 
     """
     content = ''
-    if source.startswith("+"):
+    if source.startswith("+"): #find in private.pfs
         source = source[1:] #skip +
         found = False 
         with open(PFS_FILENAME, "r") as fs:
             for line in fs:
                 if line.startswith("F|") and not line.startswith("X|"):
                     parts = line.strip().split("|")
-                    if parts[1] == source:
-                        content = parts[-1]
+                    if parts[1] == source: #file name match
+                        content = parts[-1] #update content 
                         found = True
                         break 
-        
+        #error message 
         if not found:
             print(f"cp error: supplemental file '{source}' not found.")
             return 
-    else:
+    else: #not a supplemental file 
         try:
             with open(source, "r") as normalFile:
                 content = normalFile.read().strip()
@@ -51,20 +51,18 @@ def fs_cp(source, destination):
             print(f"cp error: Normal file '{source}' not found.")
             return
 
-    #create new supplemental file record 
+    #create new supplemental file record if it doesnt exist as a supplement file or normal file 
     record = f"F|{destination[1:]}|{get_timestamp()}|{len(content)}|{content}\n" 
 
+    #open private.psf in append mode 
     with open(PFS_FILENAME, "a") as fs:
+        #adds record line to the end of the file 
         fs.write(record)
-
-    print(f"cp: copied to {destination}")
         
-                        
-
-    pass
-
+    #success message 
+    print(f"cp: copied to {destination}")
+ 
 # Command: show
-
 def fs_show(file):
     """
     Display the content of a supplemental file
