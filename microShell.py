@@ -145,24 +145,31 @@ def do_command(command):
     if arg[0] == "cd":
         change_dir(arg)
         return
+    #check if the first item in the arg list is the cp command
     elif arg[0] == "cp" and ("+" in arg[1] or "+" in arg[2]):
         fs_cp(arg[1], arg[2])
         return
+    #check if the first item in the arg list is the show command
     elif arg[0] == "show" and "+" in arg[1]:
         fs_show(arg[1])
         return
+    #check if the first item in the arg list is the merge command
     elif arg[0] == "merge" and all("+" in f for f in arg[1:3]):
         fs_merge(arg[1], arg[2], arg[3])
         return
+    #check if the first item in the arg list is the rm command
     elif arg[0] == "rm" and "+" in arg[1]:
         fs_rm(arg[1])
         return
+    #check if the first item in the arg list is the mkdir command
     elif arg[0] == "mkdir" and "+" in arg[1]:
         fs_mkdir(arg[1])
         return
+    #check if the first item in the arg list is the rmdir command
     elif arg[0] == "rmdir" and "+" in arg[1]:
         fs_rmdir(arg[1])
         return
+    #check if the first item in the arg list is the ls command
     elif arg[0] == "ls" and "+" in arg[1]:
         fs_ls(arg[1])
         return
