@@ -2,6 +2,7 @@
 import os
 import sys
 import re
+from fsCommands import fs_cp, fs_show, fs_merge, fs_rm, fs_mkdir, fs_rmdir, fs_ls
 
 #command to split the command but keeps any double quotes 
 # Ex.   grep "test" file.txt --> ['grep', '"test"', 'text.txt']

@@ -106,7 +106,7 @@ def fs_merge(file1, file2, destination):
         return 
 
     mergeContent = contentF1 + contentF2
-    record = f"F|{destination[1:]|{get_timestamp()}|{len(mergeContent)}|{mergeContent}}\n"
+    record = f"F|{destination[1:]}|{get_timestamp()}|{len(mergeContent)}|{mergeContent}\n"
 
     #append to private.pfs
     with open(PFS_FILENAME, "a") as fs:
