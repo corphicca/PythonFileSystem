@@ -154,7 +154,7 @@ def do_command(command):
         fs_show(arg[1])
         return
     #check if the first item in the arg list is the merge command
-    elif arg[0] == "merge" and all("+" in f for f in arg[1:3]):
+    elif arg[0] == "merge" and len(arg) == 4:
         fs_merge(arg[1], arg[2], arg[3])
         return
     #check if the first item in the arg list is the rm command
