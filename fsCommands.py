@@ -81,39 +81,37 @@ def fs_show(file):
 
 # Command: merge
 def fs_merge(file1, file2, destination):
-    """
-    Merge contents of two supplemental files into a new one
-    """
-    #skip + if it starts with +, else keep file name as is 
-    firstFile = file1[1:] if file1.startswith("+") else file1 
-    secondFile = file2[1:] if file2.startswith("+") else file2 
-    #initialize content as empty 
-    contentF1 = contentF2 = ""
+    def read_file(name):
+        # Strip '+' and check source
+        if name.startswith("+"):
+            name = name[1:]
+            with open(PFS_FILENAME, "r") as f:
+                for line in f:
+                    if line.startswith("F|") and not line.startswith("X|"):
+                        parts = line.strip().split("|")
+                        if parts[1] == name:
+                            return parts[-1]
+            return None
+        else:
+            try:
+                with open(name, "r") as f:
+                    return f.read().strip()
+            except FileNotFoundError:
+                return None
 
-    with open(PFS_FILENAME, "r") as fs:
-        lines = fs.readlines() #return as a list of strings 
-    for line in lines:
-        if line.startswith("F") and not line.startswith("X"):
-            parts = line.strip().split("|") #split the read line into an array 
-            if parts[1] == firstFile: #names match -> get content 
-                contentF1 = parts[-1]
-            elif parts[1] == secondFile: #names match -> get content 
-                contentF2 = parts[-1]
+    content1 = read_file(file1)
+    content2 = read_file(file2)
 
-    #if empty/not found since no content was added 
-    if not contentF1 or not contentF2:
-        print(f"merge error: one or both files not found.")
-        return 
+    if not content1 or not content2:
+        print("merge error: one or both files not found.")
+        return
+    
+    merged = content1.rstrip() + "\n" + content2
+    record = f"F|{destination[1:]}|{get_timestamp()}|{len(merged)}|{merged}\n"
+    with open(PFS_FILENAME, "a") as f:
+        f.write(record)
+    print(f"merge: created {destination} with merged content")
 
-    mergeContent = contentF1 + contentF2
-    record = f"F|{destination[1:]}|{get_timestamp()}|{len(mergeContent)}|{mergeContent}\n"
-
-    #append to private.pfs
-    with open(PFS_FILENAME, "a") as fs:
-        fs.write(record)
-
-    #success message 
-    print(f"merge: created {destination} with combined contents.")    
 
 # Command: rm
 def fs_rm(file):
