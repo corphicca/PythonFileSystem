@@ -117,31 +117,81 @@ def fs_merge(file1, file2, destination):
 
 # Command: rm
 def fs_rm(file):
-    """
-    Mark a file as deleted in private.pfs
-    """
-    pass
-
-# Command: mkdir
+    file = file[1:] if file.startswith("+") else file
+    with open(PFS_FILENAME, "r+b") as fs:
+        offset = 0
+        for line in fs:
+            if line.startswith("F|") and not line.startswith("X|"):
+                parts = line.strip().split("|")
+                if parts[1] == file:
+                    fs.seek(offset)
+                    fs.write(b"X")
+                    print(f"rm: deleted {file}")
+                    return
+            offset += len(line.encode())
+    print(f"rm error: File '{file}' not found.")
 
 def fs_mkdir(directory_name):
-    """
-    Create a new directory record in private.pfs
-    """
-    pass
-
-# Command: rmdir
+    dirname = directory_name[1:] if directory_name.startswith("+") else directory_name
+    with open(PFS_FILENAME, "r") as fs:
+        for line in fs:
+            if line.startswith("D|") and not line.startswith("X|"):
+                parts = line.strip().split("|")
+                if parts[1] == dirname:
+                    print(f"mkdir error: directory '{dirname}' already exists.")
+                    return
+    record = f"D|{dirname}|{get_timestamp()}\n"
+    with open(PFS_FILENAME, "a") as fs:
+        fs.write(record)
+    print(f"mkdir: created directory {directory_name}")
 
 def fs_rmdir(directory_name):
-    """
-    Remove a directory if it's empty
-    """
-    pass
-
-# Command: ls
+    dirname = directory_name[1:] if directory_name.startswith("+") else directory_name
+    found_files = False
+    offset = 0
+    with open(PFS_FILENAME, "r+b") as fs:
+        lines = fs.readlines()
+        for i, line in enumerate(lines):
+            if line.startswith("F|") and not line.startswith("X|"):
+                parts = line.strip().split("|")
+                if parts[1].startswith(f"{dirname}:"):
+                    found_files = True
+            elif line.startswith("D|") and not line.startswith("X|"):
+                parts = line.strip().split("|")
+                if parts[1] == dirname:
+                    if found_files:
+                        print(f"rmdir error: directory '{dirname}' is not empty.")
+                        return
+                    fs.seek(offset)
+                    fs.write(b"X")
+                    print(f"rmdir: removed directory {directory_name}")
+                    return
+            offset += len(line)
+    print(f"rmdir error: directory '{dirname}' not found.")
 
 def fs_ls(target):
-    """
-    List file info or directory contents
-    """
-    pass
+    name = target[1:] if target.startswith("+") else target
+    is_dir = False
+    with open(PFS_FILENAME, "r") as fs:
+        lines = fs.readlines()
+        for line in lines:
+            if line.startswith("D|") and not line.startswith("X|"):
+                parts = line.strip().split("|")
+                if parts[1] == name:
+                    is_dir = True
+                    break
+
+    output = []
+    for line in lines:
+        if line.startswith("F|") and not line.startswith("X|"):
+            parts = line.strip().split("|")
+            if is_dir:
+                if parts[1].startswith(name + ":"):
+                    file_only = parts[1].split(":")[-1]
+                    output.append(f"{name}/{file_only} - Last Modified: {parts[2]}")
+            elif parts[1] == name:
+                output.append(f"{parts[1]} - Last Modified: {parts[2]}")
+    if output:
+        print(" : ".join(output))
+    else:
+        print(f"ls error: target '{target}' not found.")
