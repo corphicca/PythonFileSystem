@@ -81,6 +81,10 @@ def fs_show(file):
 
 # Command: merge
 def fs_merge(file1, file2, destination):
+    """
+    Merges the content of two files (supplemental or normal) into a new supplemental file.
+    Adds a newline between the two contents only if the first does not end with one.
+    """
     def read_file(name):
         # Strip '+' and check source
         if name.startswith("+"):
@@ -115,6 +119,9 @@ def fs_merge(file1, file2, destination):
 
 # Command: rm
 def fs_rm(file):
+    """
+    Soft deletes a supplemental file by marking its record with X (instead of F).
+    """
     name = file[1:] if file.startswith("+") else file
 
     with open(PFS_FILENAME, "r") as f:
@@ -134,6 +141,9 @@ def fs_rm(file):
 
 
 def fs_mkdir(directory_name):
+    """
+    Creates a directory record in private.pfs (D|dirname|...).
+    """
     dirname = directory_name[1:] if directory_name.startswith("+") else directory_name
     with open(PFS_FILENAME, "r") as fs:
         for line in fs:
@@ -148,6 +158,9 @@ def fs_mkdir(directory_name):
     print(f"mkdir: created directory {directory_name}")
 
 def fs_rmdir(directory_name):
+    """
+    Deletes a directory only if it's empty (no files prefixed with dirname/).
+    """
     name = directory_name[1:] if directory_name.startswith("+") else directory_name
 
     with open(PFS_FILENAME, "r") as f:
@@ -173,6 +186,10 @@ def fs_rmdir(directory_name):
     print(f"rmdir error: Directory '{directory_name}' not found.")
 
 def fs_ls(target):
+    """
+    Lists metadata if the target is a file, or child entries if the target is a directory.
+    Uses prefix matching to discover directory contents.
+    """
     name = target[1:] if target.startswith("+") else target
     output = []
 
